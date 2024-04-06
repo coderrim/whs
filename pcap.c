@@ -26,15 +26,19 @@ struct ipheader {
   struct  in_addr    iph_destip;   // 목적지 IP 주소
 };
 
-void got_packet(u_char *args, const struct pcap_pkthdr *header,
-                              const u_char *packet)
+void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
   struct ethheader *eth = (struct ethheader *)packet;
+
+  printf("Ethernet Header:\n");
+  printf("From: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2], eth->ether_shost[3], eth->ether_shost[4], eth->ether_shost[5]);
+  printf("To: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2], eth->ether_dhost[3], eth->ether_dhost[4], eth->ether_dhost[5]);
 
   if (ntohs(eth->ether_type) == 0x0800) { // 0x0800은 IP 타입
     struct ipheader * ip = (struct ipheader *)
                            (packet + sizeof(struct ethheader)); 
 
+    printf("IP Header:\n");
     printf("From: %s\n", inet_ntoa(ip->iph_sourceip));   
     printf("To: %s\n", inet_ntoa(ip->iph_destip));    
 
@@ -64,7 +68,7 @@ int main()
   char filter_exp[] = "tcp";
   bpf_u_int32 net;
 
-  // STEP 1: NIC 이름이 enp0s3인 NIC에서 라이브 pcap 세션 열기
+  // STEP 1: NIC 이름이 ens33인 NIC에서 라이브 pcap 세션 열기
   handle = pcap_open_live("ens33", BUFSIZ, 1, 1000, errbuf);
   if (handle == NULL) {
       fprintf(stderr, "장치 %s 열기에 실패했습니다: %s\n", "ens33", errbuf);
